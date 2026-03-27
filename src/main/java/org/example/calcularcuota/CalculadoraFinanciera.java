@@ -47,6 +47,8 @@ public final class CalculadoraFinanciera {
 
     public double calcularCuotaMensual(double monto, double tasa, int meses) {
 
+        validarEntradas(monto, tasa, meses);
+
         double tasaMensual = calcularTasaMensual(tasa);
 
         if (tasaMensual == 0) {
