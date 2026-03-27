@@ -32,7 +32,7 @@ steps:
       workingDirectory: '$(projectDir)'
       gradleWrapperFile: '$(projectDir)/gradlew'
       gradleOptions: '-Dfile.encoding=UTF-8'
-      tasks: 'test'
+      tasks: 'acceptanceTest'
       testResultsFiles: '**/build/test-results/acceptanceTest/TEST-*.xml'
       publishJUnitResults: true
 
