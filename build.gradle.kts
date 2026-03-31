@@ -34,6 +34,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testImplementation("io.cucumber:cucumber-java:7.18.0")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.18.0")
+
+    testImplementation("org.junit.platform:junit-platform-suite:1.10.2")
 }
 
 sonar {
@@ -47,6 +52,7 @@ sonar {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("file.encoding", "UTF-8")
 }
 
 java {
@@ -72,4 +78,17 @@ pitest {
     outputFormats.set(
         listOf("HTML", "XML")
     )
+}
+
+tasks.register<Test>("acceptanceTest") {
+    useJUnitPlatform()
+    description = "Runs Cucumber acceptance tests."
+    group = "verification"
+
+    useJUnitPlatform()
+
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+
+    systemProperty("cucumber.plugin", "pretty")
 }
