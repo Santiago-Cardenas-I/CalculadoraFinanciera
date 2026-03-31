@@ -80,7 +80,15 @@ pitest {
     )
 }
 
-tasks.register<Test>("acceptanceTest") { useJUnitPlatform()
+tasks.register<Test>("acceptanceTest") {
+    useJUnitPlatform()
     description = "Runs Cucumber acceptance tests."
     group = "verification"
+
+    useJUnitPlatform()
+
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+
+    systemProperty("cucumber.plugin", "pretty")
 }
