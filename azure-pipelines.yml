@@ -5,7 +5,11 @@ pool:
   name: LocalPool   # Tu agente local registrado en Azure DevOps
 
 variables:
+<<<<<<< HEAD
   projectDir: 'calculadoraFinanciera'
+=======
+  projectDir: '.'
+>>>>>>> 9fc19709e848754dd0b586c290209184e856bf44
 
 steps:
   # Paso 1: Chequear el código
