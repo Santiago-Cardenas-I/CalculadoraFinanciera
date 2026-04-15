@@ -7,7 +7,7 @@ Feature:  Calculadora Financiera
       And un plazo de 12 meses
     Then el resultado de la cuota mensual debe ser 856.07
 
-  Scenario: Mostratr error al ingresar un monto no permitido
+  Scenario: Mostrar error al ingresar un monto no permitido
     Given que el usuario se encuentra en la calculadora financiera
     When el usuario ingresa un monto de -5000, una tasa de interes del 5% y un plazo de 12 meses
     Then el sistema debe mostrar un mensaje de error indicando que el monto debe ser mayor a cero
