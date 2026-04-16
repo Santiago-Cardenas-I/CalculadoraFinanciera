@@ -53,7 +53,7 @@ steps:
        gradleOptions: '-Dfile.encoding=UTF-8'
        tasks: 'sonarqube -Dsonar.projectKey=calculadoraFinanciera 
        -Dsonar.host.url=http://localhost:9000/ 
-       -Dsonar.token=$(SONAR_TOKEN)'S
+       -Dsonar.token=$(SONAR_TOKEN)'
 
 #7 task: PublishPipelineArtifact@1
 
