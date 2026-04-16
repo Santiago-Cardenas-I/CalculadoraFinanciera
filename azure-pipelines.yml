@@ -5,11 +5,8 @@ pool:
   name: LocalPool   # Tu agente local registrado en Azure DevOps
 
 variables:
-<<<<<<< HEAD
-  projectDir: 'calculadoraFinanciera'
-=======
   projectDir: '.'
->>>>>>> 9fc19709e848754dd0b586c290209184e856bf44
+
 
 steps:
   # Paso 1: Chequear el código
@@ -48,10 +45,20 @@ steps:
       gradleOptions: '-Dfile.encoding=UTF-8'
       tasks: 'pitest'
 
-  # Paso 6 (Opcional): Análisis con SonarQube
-  # - task: Gradle@2
-  #   inputs:
-  #     workingDirectory: '$(projectDir)'
-  #     gradleWrapperFile: '$(projectDir)/gradlew'
-  #     gradleOptions: '-Dfile.encoding=UTF-8'
-  #     tasks: 'sonarqube'
+ #Paso 6 (Opcional): Análisis con SonarQube
+  - task: Gradle@2
+    inputs:
+       workingDirectory: '$(projectDir)'
+       gradleWrapperFile: '$(projectDir)/gradlew'
+       gradleOptions: '-Dfile.encoding=UTF-8'
+       tasks: 'sonarqube -Dsonar.projectKey=calculadoraFinanciera 
+       -Dsonar.host.url=http://localhost:9000/ 
+       -Dsonar.token=$(SONAR_TOKEN)'S
+
+#7 task: PublishPipelineArtifact@1
+
+displayName: 'Artefacto en Azure'
+inputs:
+  targetPath: '$(projectDir)/build/libs'
+  artifact: 'Calculadora-App'
+  publishLocation: 'pipeline'
