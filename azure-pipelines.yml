@@ -2,7 +2,7 @@ trigger:
   - master
 
 pool:
-  name: LocalPool   # Tu agente local registrado en Azure DevOps
+  name: Dafault   # Tu agente local registrado en Azure DevOps
 
 variables:
   projectDir: '.'
