@@ -51,7 +51,11 @@ steps:
        workingDirectory: '$(projectDir)'
        gradleWrapperFile: '$(projectDir)/gradlew'
        gradleOptions: '-Dfile.encoding=UTF-8'
-       tasks: 'sonar -Dsonar.projectKey=calculadoraFinanciera -Dsonar.host.url=http://localhost:9000/ -Dsonar.token=$(SONAR_TOKEN)'
+       tasks: 'sonar'
+    env:
+         SONAR_TOKEN: $(SONAR_TOKEN)
+
+#-Dsonar.projectKey=calculadoraFinanciera -Dsonar.host.url=http://localhost:9000/ -Dsonar.token=$(SONAR_TOKEN)'
 
 # Paso 7: Publicar el Artefacto (Guardar el .jar de la aplicación)
   - task: PublishPipelineArtifact@1
