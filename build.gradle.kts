@@ -49,6 +49,8 @@ sonar {
         property("sonar.projectName", "calculadoraFinanciera")
         property("sonar.host.url", "http://localhost:9000")
         property("sonar.token", System.getenv("SONAR_TOKEN"))
+
+        property("sonar.qualitygate.wait", "true")
     }
 }
 
