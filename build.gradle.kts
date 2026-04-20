@@ -44,7 +44,7 @@ dependencies {
 sonar {
 
     properties {
-        property("sonar.java.binaries", "build/classes/java/main")
+        property ("sonar.java.binaries", "build/classes/java/main")
         property("sonar.projectKey", "CalculadoraFinanciera")
         property("sonar.projectName", "calculadoraFinanciera")
         property("sonar.host.url", "http://localhost:9000")
