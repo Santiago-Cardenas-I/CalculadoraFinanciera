@@ -6,7 +6,11 @@ pool:
 
 variables:
   projectDir: '.'
-
+  # --- Variables agregadas para JMeter ---
+  jmxFile: 'tests/stress_test_pipeline.jmx'
+  resultsFolder: 'results'
+  resultsFile: '$(resultsFolder)/results.jtl'
+  htmlReport: '$(resultsFolder)/html'
 
 steps:
   # Paso 1: Chequear el código
@@ -45,22 +49,40 @@ steps:
       gradleOptions: '-Dfile.encoding=UTF-8'
       tasks: 'pitest'
 
- #Paso 6 (Opcional): Análisis con SonarQube
+  # Paso 6 (Opcional): Análisis con SonarQube
   - task: Gradle@2
     inputs:
-       workingDirectory: '$(projectDir)'
-       gradleWrapperFile: '$(projectDir)/gradlew'
-       gradleOptions: '-Dfile.encoding=UTF-8'
-       tasks: 'sonar'
+      workingDirectory: '$(projectDir)'
+      gradleWrapperFile: '$(projectDir)/gradlew'
+      gradleOptions: '-Dfile.encoding=UTF-8'
+      tasks: 'sonar'
     env:
-         SONAR_TOKEN: $(SONAR_TOKEN)
+      SONAR_TOKEN: $(SONAR_TOKEN)
 
-#-Dsonar.projectKey=calculadoraFinanciera -Dsonar.host.url=http://localhost:9000/ -Dsonar.token=$(SONAR_TOKEN)'
-
-# Paso 7: Publicar el Artefacto (Guardar el .jar de la aplicación)
+  # Paso 7: Publicar el Artefacto (Guardar el .jar de la aplicación)
   - task: PublishPipelineArtifact@1
     displayName: 'Artefacto en Azure'
     inputs:
-     targetPath: '$(projectDir)/build/libs'
-     artifact: 'Calculadora-App'
-     publishLocation: 'pipeline'
+      targetPath: '$(projectDir)/build/libs'
+      artifact: 'Calculadora-App'
+      publishLocation: 'pipeline'
+
+  # Paso 8: Preparar directorios para JMeter (Con validación para evitar errores)
+  - script: |
+      echo "Preparando carpeta de resultados..."
+      if not exist $(resultsFolder) mkdir $(resultsFolder)
+    displayName: "Preparar directorios JMeter"
+
+  # Paso 9: Ejecutar prueba de rendimiento con JMeter (Modo No-GUI)
+  - script: |
+      echo "Ejecutando prueba de rendimiento con JMeter..."
+      jmeter -n -t "$(jmxFile)" -l "$(resultsFile)" -e -o "$(htmlReport)"
+    displayName: "Ejecución de prueba JMeter"
+
+  # Paso 10: Publicar reporte HTML de JMeter como Artefacto
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(htmlReport)'
+      ArtifactName: 'jmeter-report'
+      publishLocation: 'Container'
+    displayName: "Publicar reporte HTML de JMeter"
