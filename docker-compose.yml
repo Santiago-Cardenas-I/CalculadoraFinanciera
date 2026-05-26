@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  calculadora:
+    image: calculadorafinanciera
+    container_name: mi-calculadora
+    ports:
+      - "8080:8080"
+    restart: always
