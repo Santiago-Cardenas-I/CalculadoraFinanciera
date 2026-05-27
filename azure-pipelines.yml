@@ -82,12 +82,14 @@ steps:
     displayName: "Preparar directorios JMeter"
 
 
-  #PASO 10: Levantar la aplicación en Docker antes de JMeter
+  # PASO 10: Levantar la aplicación en Docker antes de JMeter
   - script: |
+      echo "Limpiando cualquier contenedor previo para evitar conflictos..."
+      docker-compose down
       echo "Encendiendo la calculadora en Docker..."
-      docker-compose up -d
+      docker-compose up -d --force-recreate
       echo "Esperando 15 segundos a que Spring Boot inicie por completo..."
-      timeout /t 15 /nobreak > nul
+      ping 127.0.0.1 -n 16 > nul
     displayName: "Docker: Levantar Contenedor"
     workingDirectory: '$(projectDir)'
 
