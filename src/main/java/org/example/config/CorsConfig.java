@@ -13,11 +13,11 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // 👈 Aplica para todas las rutas del backend (/finanzas, etc.)
-                        .allowedOrigins("http://localhost:5173") // 👈 Permite el puerto por defecto de Vite/React
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
-                        .allowedHeaders("*") // Permite cualquier cabecera (header)
-                        .allowCredentials(true); // Por si en el futuro manejas cookies o sesiones
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:5173")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
