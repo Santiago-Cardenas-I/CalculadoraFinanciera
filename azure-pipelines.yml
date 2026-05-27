@@ -31,7 +31,15 @@ steps:
       testResultsFiles: '**/build/test-results/test/TEST-*.xml'
       tasks: 'clean build test'
 
-  # Paso 4: Ejecutar pruebas de aceptación (Cucumber)
+
+  # PASO 4: Construir la Imagen de Docker (Justo después de compilar el .jar)
+  - script: |
+      echo "Construyendo la imagen Docker de la calculadora..."
+      docker build -t calculadorafinanciera .
+    displayName: "Docker: Construir Imagen"
+    workingDirectory: '$(projectDir)'
+
+  # Paso 5: Ejecutar pruebas de aceptación (Cucumber)
   - task: Gradle@2
     inputs:
       workingDirectory: '$(projectDir)'
@@ -41,7 +49,7 @@ steps:
       testResultsFiles: '**/build/test-results/acceptanceTest/TEST-*.xml'
       publishJUnitResults: true
 
-  # Paso 5: Ejecutar pruebas de mutación (Pitest)
+  # Paso 6: Ejecutar pruebas de mutación (Pitest)
   - task: Gradle@2
     inputs:
       workingDirectory: '$(projectDir)'
@@ -49,7 +57,7 @@ steps:
       gradleOptions: '-Dfile.encoding=UTF-8'
       tasks: 'pitest'
 
-  # Paso 6 (Opcional): Análisis con SonarQube
+  # Paso 7: (Opcional): Análisis con SonarQube
   - task: Gradle@2
     inputs:
       workingDirectory: '$(projectDir)'
@@ -59,7 +67,7 @@ steps:
     env:
       SONAR_TOKEN: $(SONAR_TOKEN)
 
-  # Paso 7: Publicar el Artefacto (Guardar el .jar de la aplicación)
+  # Paso 8: Publicar el Artefacto (Guardar el .jar de la aplicación)
   - task: PublishPipelineArtifact@1
     displayName: 'Artefacto en Azure'
     inputs:
@@ -67,19 +75,38 @@ steps:
       artifact: 'Calculadora-App'
       publishLocation: 'pipeline'
 
-  # Paso 8: Preparar directorios para JMeter (Con validación para evitar errores)
+  # Paso 9: Preparar directorios para JMeter
   - script: |
       echo "Preparando carpeta de resultados..."
       if not exist $(resultsFolder) mkdir $(resultsFolder)
     displayName: "Preparar directorios JMeter"
 
-  # Paso 9: Ejecutar prueba de rendimiento con JMeter (Modo No-GUI)
+
+  #PASO 10: Levantar la aplicación en Docker antes de JMeter
+  - script: |
+      echo "Encendiendo la calculadora en Docker..."
+      docker-compose up -d
+      echo "Esperando 15 segundos a que Spring Boot inicie por completo..."
+      timeout /t 15 /nobreak > nul
+    displayName: "Docker: Levantar Contenedor"
+    workingDirectory: '$(projectDir)'
+
+  # Paso 11: Ejecutar prueba de rendimiento con JMeter (Modo No-GUI)
   - script: |
       echo "Ejecutando prueba de rendimiento con JMeter..."
       jmeter -n -t "$(jmxFile)" -l "$(resultsFile)" -e -o "$(htmlReport)"
     displayName: "Ejecución de prueba JMeter"
 
-  # Paso 10: Publicar reporte HTML de JMeter como Artefacto
+
+  # PASO 12: Apagar y limpiar contenedores (SIEMPRE SE EJECUTA)
+  - script: |
+      echo "Apagando contenedores y liberando puertos..."
+      docker-compose down
+    displayName: "Docker: Apagar y Limpiar"
+    workingDirectory: '$(projectDir)'
+    condition: always() # Obliga a que corra incluso si las pruebas de JMeter fallan
+
+  # Paso 13: Publicar reporte HTML de JMeter como Artefacto
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: '$(htmlReport)'
