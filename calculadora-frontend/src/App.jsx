@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Login from './Login'; // Asegúrate de que Login.jsx esté en la misma carpeta
 
 export default function App() {
+  // --- ESTADO DE AUTENTICACIÓN ---
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // --- ESTADOS DE LA CALCULADORA ---
   const [monto, setMonto] = useState('');
   const [tasa, setTasa] = useState(''); // Ahora es Tasa Anual
   const [meses, setMeses] = useState('');
@@ -11,7 +16,27 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Función para generar la tabla en el frontend usando el valor exacto del backend
+  // --- EFECTO PARA VERIFICAR SESIÓN ---
+  // Revisa si ya hay un token guardado al recargar la página
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    // Limpiamos los datos por seguridad al cerrar sesión
+    setResultado(null);
+    setTablaAmortizacion([]);
+    setMonto('');
+    setTasa('');
+    setMeses('');
+  };
+
+  // --- FUNCIONES DE LA CALCULADORA ---
   const generarTablaFrontend = (montoInicial, tasaAnual, plazo, cuotaFija) => {
     const tasaMensual = (tasaAnual / 100) / 12;
     let saldo = parseFloat(montoInicial);
@@ -42,7 +67,7 @@ export default function App() {
     setResultado(null);
     setTablaAmortizacion([]);
 
-    // Validación rápida en el cliente (reflejo de tu validarEntradas en Java)
+    // Validación rápida en el cliente
     if (monto <= 0 || tasa < 0 || meses <= 0) {
       setError("Error: El monto y los meses deben ser mayores que 0, y la tasa no puede ser negativa.");
       setLoading(false);
@@ -52,7 +77,15 @@ export default function App() {
     const url = `http://localhost:8080/finanzas/${tipoCalculo}?monto=${monto}&tasa=${tasa}&meses=${meses}`;
 
     try {
-      const response = await fetch(url, { method: 'GET' });
+      // Obtenemos el token para enviarlo (por si luego tu calculadora también pide auth)
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}` // Opcional: Preparamos la cabecera por si tu backend la pide
+        }
+      });
 
       if (!response.ok) {
         throw new Error('Error en el servidor. Verifica los datos ingresados.');
@@ -78,8 +111,22 @@ export default function App() {
     return '$' + Number(valor).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
+  // --- RENDERIZADO CONDICIONAL ---
+  // Si no está logueado, mostramos directamente la pantalla de Login
+  if (!isLoggedIn) {
+    return <Login onLoginSuccess={() => setIsLoggedIn(true)} />;
+  }
+
+  // Si está logueado, mostramos la calculadora financiera
   return (
     <div style={styles.container}>
+      {/* Barra superior para el botón de Cerrar Sesión */}
+      <div style={styles.headerBar}>
+        <button onClick={handleLogout} style={styles.logoutButton}>
+          Cerrar Sesión
+        </button>
+      </div>
+
       <div style={styles.card}>
         <h2 style={styles.title}>Simulador Financiero</h2>
 
@@ -116,7 +163,7 @@ export default function App() {
         {/* Manejo de Errores Visuales */}
         {error && (
           <div style={styles.errorBanner}>
-            <strong>⚠️ Atención:</strong> {error}
+            <strong> Atención:</strong> {error}
           </div>
         )}
       </div>
@@ -177,7 +224,9 @@ export default function App() {
 
 // Estilos
 const styles = {
-  container: { display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f3f4f6', fontFamily: 'system-ui, sans-serif', padding: '40px 20px', gap: '30px' },
+  container: { display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f3f4f6', fontFamily: 'system-ui, sans-serif', padding: '20px', gap: '20px' },
+  headerBar: { width: '100%', maxWidth: '800px', display: 'flex', justifyContent: 'flex-end' },
+  logoutButton: { backgroundColor: '#dc2626', color: '#ffffff', padding: '10px 20px', borderRadius: '8px', border: 'none', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'background-color 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
   card: { backgroundColor: '#ffffff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', width: '100%', maxWidth: '450px' },
   title: { textAlign: 'center', color: '#1f2937', marginBottom: '24px', fontSize: '24px' },
   form: { display: 'flex', flexDirection: 'column', gap: '16px' },
