@@ -96,7 +96,7 @@ steps:
   # Paso 11: Ejecutar prueba de rendimiento con JMeter (Modo No-GUI)
   - script: |
       echo "Ejecutando prueba de rendimiento con JMeter..."
-      "C:\Users\carde\OneDrive\Desktop\Jmeter\bin\jmeter.bat" -n -t "$(jmxFile)" -l "$(resultsFile)" -e -o "$(htmlReport)"
+      "C:\Users\carde\OneDrive\Desktop\Jmeter\apache-jmeter-5.6.3\bin\jmeter.bat" -n -t "$(jmxFile)" -l "$(resultsFile)" -e -o "$(htmlReport)"
     displayName: "Ejecución de prueba JMeter"
 
 
