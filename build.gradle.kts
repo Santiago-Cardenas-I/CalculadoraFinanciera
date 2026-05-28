@@ -18,15 +18,10 @@ val pitestJunit5Version = "1.2.1"
 
 dependencies {
 
-    // ============================
-    // Aplicación
-    // ============================
+
 
     implementation("org.springframework.boot:spring-boot-starter-web")
 
-    // ============================
-    // Testing
-    // ============================
 
     testImplementation(platform("org.junit:junit-bom:$junitVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -39,6 +34,12 @@ dependencies {
     testImplementation("io.cucumber:cucumber-junit-platform-engine:7.18.0")
 
     testImplementation("org.junit.platform:junit-platform-suite:1.10.2")
+
+    testImplementation("net.serenity-bdd:serenity-core:3.9.8")
+    testImplementation("net.serenity-bdd:serenity-cucumber:3.9.8")
+    testImplementation("org.seleniumhq.selenium:selenium-java:4.14.1")
+
+
 }
 
 sonar {
