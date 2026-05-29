@@ -54,8 +54,8 @@ steps:
   - script: |
       echo "Fijando JAVA_HOME a la ruta corta sin espacios..."
       set JAVA_HOME=C:\PROGRA~1\AMAZON~1\jdk17.0.18_9
-      echo "Ejecutando Pitest puro sin demonios y con info detallada..."
-      .\gradlew.bat pitest --no-daemon --info
+      echo "Ejecutando Pitest puro sin demonios y rastreo de errores..."
+      .\gradlew.bat pitest --no-daemon --info --stacktrace
     displayName: "Pitest: Pruebas de Mutación (Script Directo)"
     workingDirectory: '$(projectDir)'
 
