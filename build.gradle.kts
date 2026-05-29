@@ -69,19 +69,14 @@ java {
 pitest {
     junit5PluginVersion.set(pitestJunit5Version)
 
-    targetClasses.set(
-        listOf("org.example.*")
-    )
+    useClasspathFile.set(true)
 
-    targetTests.set(
-        listOf("org.example.*Test")
-    )
+    targetClasses.set(listOf("org.example.*"))
+    targetTests.set(listOf("org.example.*Test"))
 
     threads.set(4)
 
-    outputFormats.set(
-        listOf("HTML", "XML")
-    )
+    outputFormats.set(listOf("HTML", "XML"))
 }
 
 tasks.register<Test>("acceptanceTest") {
