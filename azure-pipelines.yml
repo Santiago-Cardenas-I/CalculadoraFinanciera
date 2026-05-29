@@ -51,18 +51,13 @@ steps:
       publishJUnitResults: true
 
   # Paso 6: Ejecutar pruebas de mutación (Pitest)
-  # Paso 6: Ejecutar pruebas de mutación (Pitest)
-  - task: Gradle@2
-    displayName: "Pitest: Pruebas de Mutación"
-    inputs:
-      workingDirectory: '$(projectDir)'
-      gradleWrapperFile: '$(projectDir)/gradlew'
-      gradleOptions: '-Dfile.encoding=UTF-8'
-      tasks: 'pitest'
-
-      javaHomeOption: 'Path'
-      jdkUserInputPath: 'C:\Program Files\Amazon Corretto\jdk17.0.18_9'
-      jdkArchitectureOption: 'x64'
+  - script: |
+      echo "Fijando JAVA_HOME a la ruta corta sin espacios..."
+      set JAVA_HOME=C:\PROGRA~1\AMAZON~1\jdk17.0.18_9
+      echo "Ejecutando Pitest puro sin demonios y con info detallada..."
+      .\gradlew.bat pitest --no-daemon --info
+    displayName: "Pitest: Pruebas de Mutación (Script Directo)"
+    workingDirectory: '$(projectDir)'
 
   # Paso 7: Análisis con SonarQube
   - task: Gradle@2
