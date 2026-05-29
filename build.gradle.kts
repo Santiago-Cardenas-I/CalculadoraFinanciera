@@ -67,7 +67,6 @@ java {
 }
 
 pitest {
-
     junit5PluginVersion.set(pitestJunit5Version)
 
     targetClasses.set(
