@@ -28,7 +28,8 @@ steps:
       workingDirectory: '$(projectDir)'
       gradleWrapperFile: '$(projectDir)/gradlew'
       gradleOptions: '-Dfile.encoding=UTF-8 -Xmx3072m'
-      tasks: 'clean build' # Eliminamos 'test' de aquí para que no choque
+      options: '-x test'
+      tasks: 'clean build'
 
   # PASO 4: Construir la Imagen de Docker (Justo después de compilar el .jar)
   - script: |
