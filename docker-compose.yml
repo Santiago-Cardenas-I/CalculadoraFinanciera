@@ -1,9 +1,69 @@
 version: '3.8'
 
 services:
+  # 1. Backend de la Calculadora Financiera
   calculadora:
-    image: calculadorafinanciera
+    build: .
     container_name: mi-calculadora
     ports:
       - "8080:8080"
     restart: always
+    depends_on:
+      - auth-service
+    networks:
+      - red-calculadora
+
+  #  2. Backend del Sistema de Autenticación (Submódulo)
+  auth-service:
+    container_name: mi-autenticacion
+    build:
+      context: ./SistemaDeAutenticacion
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080" # Mapeo local: Entra por el 8081 de tu PC y va al 8080 local del código de Auth
+    restart: always
+    networks:
+      - red-calculadora
+
+  # 3. Frontend de la Calculadora (React / Vite)
+  frontend:
+    container_name: mi-frontend
+    build:
+      context: calculadora-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    restart: always
+    depends_on:
+      - calculadora
+    networks:
+      - red-calculadora
+
+  #  4. Frontend del Sistema de Autenticación
+  auth-frontend:
+    container_name: mi-auth-frontend
+    build:
+      context: ./SistemaDeAutenticacion/frontend # Revisa que el nombre de la carpeta coincida dentro del submódulo
+      dockerfile: Dockerfile
+    ports:
+      - "5174:80" # Entra por el 5174 de tu PC y va al 5173 local del código de este front
+    restart: always
+    depends_on:
+      - auth-service
+    networks:
+      - red-calculadora
+
+  frontend-calculadora:
+    container_name: react-frontend-calculadora
+    build:
+      context: ./calculadora-frontend # <-- ¡ESTA ES LA RUTA REAL DE TU CAPTURA 1!
+    ports:
+      - "3001:80"
+    restart: always
+    networks:
+      - red-calculadora
+
+networks:
+  red-calculadora:
+    driver: bridge
+

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/finanzas")
-@CrossOrigin(origins = "http://localhost:5173")
+
 
 public class CalculadoraController {
 

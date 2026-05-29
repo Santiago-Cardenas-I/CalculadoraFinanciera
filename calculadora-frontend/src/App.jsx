@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Login from './Login'; // Asegúrate de que Login.jsx esté en la misma carpeta
 
 export default function App() {
-  // --- ESTADO DE AUTENTICACIÓN ---
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   // --- ESTADOS DE LA CALCULADORA ---
   const [monto, setMonto] = useState('');
   const [tasa, setTasa] = useState(''); // Ahora es Tasa Anual
@@ -16,24 +12,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // --- EFECTO PARA VERIFICAR SESIÓN ---
-  // Revisa si ya hay un token guardado al recargar la página
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  }, []);
-
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    // Limpiamos los datos por seguridad al cerrar sesión
-    setResultado(null);
-    setTablaAmortizacion([]);
-    setMonto('');
-    setTasa('');
-    setMeses('');
+    // Al limpiar la sesión, redirigimos manualmente al puerto del Front de Autenticación (Puerto 5174)
+    window.location.href = 'http://localhost:5174';
   };
 
   // --- FUNCIONES DE LA CALCULADORA ---
@@ -67,7 +49,6 @@ export default function App() {
     setResultado(null);
     setTablaAmortizacion([]);
 
-    // Validación rápida en el cliente
     if (monto <= 0 || tasa < 0 || meses <= 0) {
       setError("Error: El monto y los meses deben ser mayores que 0, y la tasa no puede ser negativa.");
       setLoading(false);
@@ -77,13 +58,12 @@ export default function App() {
     const url = `http://localhost:8080/finanzas/${tipoCalculo}?monto=${monto}&tasa=${tasa}&meses=${meses}`;
 
     try {
-      // Obtenemos el token para enviarlo (por si luego tu calculadora también pide auth)
       const token = localStorage.getItem('token');
 
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}` // Opcional: Preparamos la cabecera por si tu backend la pide
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -94,7 +74,6 @@ export default function App() {
       const valorCalculado = await response.json();
       setResultado(valorCalculado);
 
-      // Si el cálculo es "cuota", generamos la tabla de amortización
       if (tipoCalculo === 'cuota') {
         const tabla = generarTablaFrontend(monto, tasa, meses, valorCalculado);
         setTablaAmortizacion(tabla);
@@ -111,16 +90,9 @@ export default function App() {
     return '$' + Number(valor).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  // --- RENDERIZADO CONDICIONAL ---
-  // Si no está logueado, mostramos directamente la pantalla de Login
-  if (!isLoggedIn) {
-    return <Login onLoginSuccess={() => setIsLoggedIn(true)} />;
-  }
-
-  // Si está logueado, mostramos la calculadora financiera
+  // --- RENDERIZADO DIRECTO ---
   return (
     <div style={styles.container}>
-      {/* Barra superior para el botón de Cerrar Sesión */}
       <div style={styles.headerBar}>
         <button onClick={handleLogout} style={styles.logoutButton}>
           Cerrar Sesión
@@ -160,7 +132,6 @@ export default function App() {
           </button>
         </form>
 
-        {/* Manejo de Errores Visuales */}
         {error && (
           <div style={styles.errorBanner}>
             <strong> Atención:</strong> {error}
@@ -168,7 +139,6 @@ export default function App() {
         )}
       </div>
 
-      {/* Bloque de Resultados Condicionales */}
       {resultado !== null && !error && (
         <div style={styles.resultsContainer}>
           <div style={styles.summaryCards}>
@@ -188,7 +158,6 @@ export default function App() {
             )}
           </div>
 
-          {/* Tabla de Amortización (Solo visible para "cuota") */}
           {tipoCalculo === 'cuota' && tablaAmortizacion.length > 0 && (
             <div style={styles.tableWrapper}>
               <h3 style={styles.tableTitle}>Tabla de Amortización</h3>
@@ -222,7 +191,6 @@ export default function App() {
   );
 }
 
-// Estilos
 const styles = {
   container: { display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f3f4f6', fontFamily: 'system-ui, sans-serif', padding: '20px', gap: '20px' },
   headerBar: { width: '100%', maxWidth: '800px', display: 'flex', justifyContent: 'flex-end' },
@@ -236,8 +204,6 @@ const styles = {
   select: { padding: '10px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '16px', backgroundColor: '#fff' },
   button: { backgroundColor: '#2563eb', color: '#ffffff', padding: '12px', borderRadius: '6px', border: 'none', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'background-color 0.2s', marginTop: '8px' },
   errorBanner: { backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #f87171', padding: '12px', borderRadius: '6px', marginTop: '20px', fontSize: '14px' },
-
-  // Estilos de Resultados y Tabla
   resultsContainer: { width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '20px' },
   summaryCards: { display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center' },
   mainCard: { flex: '1', minWidth: '250px', backgroundColor: '#ecfdf5', border: '1px solid #10b981', borderRadius: '12px', padding: '20px', textAlign: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
@@ -245,7 +211,6 @@ const styles = {
   cardTitle: { margin: '0 0 10px 0', fontSize: '16px', color: '#374151' },
   mainValue: { margin: '0', fontSize: '32px', fontWeight: 'bold', color: '#047857' },
   secondaryValue: { margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#c2410c' },
-
   tableWrapper: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', overflowX: 'auto' },
   tableTitle: { textAlign: 'center', color: '#1f2937', marginBottom: '20px', fontSize: '20px' },
   table: { width: '100%', borderCollapse: 'collapse', fontSize: '14px' },
