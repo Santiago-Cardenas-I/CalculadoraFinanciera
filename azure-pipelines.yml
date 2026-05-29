@@ -59,16 +59,16 @@ steps:
     displayName: "Pitest: Pruebas de Mutación (Script Directo)"
     workingDirectory: '$(projectDir)'
 
-  # Paso 7: Análisis con SonarQube
-  - task: Gradle@2
-    displayName: "SonarQube: Análisis de Código"
-    inputs:
-      workingDirectory: '$(projectDir)'
-      gradleWrapperFile: '$(projectDir)/gradlew'
-      gradleOptions: '-Dfile.encoding=UTF-8'
-      tasks: 'sonar'
+  # Paso 7: SonarQube (Script Directo)
+  - script: |
+      echo "Fijando JAVA_HOME a la ruta corta sin espacios..."
+      set JAVA_HOME=C:\PROGRA~1\AMAZON~1\jdk17.0.18_9
+      echo "Ejecutando SonarQube puro sin demonios..."
+      .\gradlew.bat sonar --no-daemon --info
+    displayName: "SonarQube: Análisis de Código (Script Directo)"
+    workingDirectory: '$(projectDir)'
     env:
-      SONAR_TOKEN: $(SONAR_TOKEN)
+      SONAR_TOKEN: $(SONAR_TOKEN) # Mantiene tu token seguro si lo tienes como variable en Azure
 
   # Paso 8: Publicar el Artefacto (Guardar el .jar de la aplicación)
   - task: PublishPipelineArtifact@1
