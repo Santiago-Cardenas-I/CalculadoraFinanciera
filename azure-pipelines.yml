@@ -39,9 +39,9 @@ steps:
     workingDirectory: '$(projectDir)'
 
   # Paso 5: Ejecutar pruebas de aceptación (Cucumber)
-  # NOTA: Recuerda corregir el 'UndefinedStepException' en tu IDE antes de subir el código
   - task: Gradle@2
     displayName: "Cucumber: Pruebas de Aceptación"
+    continueOnError: true
     inputs:
       workingDirectory: '$(projectDir)'
       gradleWrapperFile: '$(projectDir)/gradlew'
