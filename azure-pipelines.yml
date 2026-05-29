@@ -6,7 +6,7 @@ pool:
 
 variables:
   projectDir: '.'
-  # --- Variables agregadas para JMeter ---
+  # --- Variables para JMeter ---
   jmxFile: 'tests/stress_test_pipelines.jmx'
   resultsFolder: 'results'
   resultsFile: '$(resultsFolder)/results.jtl'
@@ -21,17 +21,14 @@ steps:
     displayName: "Verificar versión de Java (usando el del agente local)"
     workingDirectory: $(projectDir)
 
-  # Paso 3: Ejecutar compilación y pruebas unitarias
+  # Paso 3: Ejecutar compilación limpia (Saltando unitarias para evitar choques de BD)
   - task: Gradle@2
+    displayName: "Gradle: Compilar Proyecto"
     inputs:
       workingDirectory: '$(projectDir)'
       gradleWrapperFile: '$(projectDir)/gradlew'
       gradleOptions: '-Dfile.encoding=UTF-8 -Xmx3072m'
-      options: '-x test' # Evita correr pruebas unitarias en esta etapa, las haremos después con JUnit para mejor reporte
-      publishJUnitResults: true
-      testResultsFiles: '**/build/test-results/test/TEST-*.xml'
-      tasks: 'clean build test'
-
+      tasks: 'clean build' # Eliminamos 'test' de aquí para que no choque
 
   # PASO 4: Construir la Imagen de Docker (Justo después de compilar el .jar)
   - script: |
@@ -41,7 +38,9 @@ steps:
     workingDirectory: '$(projectDir)'
 
   # Paso 5: Ejecutar pruebas de aceptación (Cucumber)
+  # NOTA: Recuerda corregir el 'UndefinedStepException' en tu IDE antes de subir el código
   - task: Gradle@2
+    displayName: "Cucumber: Pruebas de Aceptación"
     inputs:
       workingDirectory: '$(projectDir)'
       gradleWrapperFile: '$(projectDir)/gradlew'
@@ -52,14 +51,16 @@ steps:
 
   # Paso 6: Ejecutar pruebas de mutación (Pitest)
   - task: Gradle@2
+    displayName: "Pitest: Pruebas de Mutación"
     inputs:
       workingDirectory: '$(projectDir)'
       gradleWrapperFile: '$(projectDir)/gradlew'
       gradleOptions: '-Dfile.encoding=UTF-8'
       tasks: 'pitest'
 
-  # Paso 7: (Opcional): Análisis con SonarQube
+  # Paso 7: Análisis con SonarQube
   - task: Gradle@2
+    displayName: "SonarQube: Análisis de Código"
     inputs:
       workingDirectory: '$(projectDir)'
       gradleWrapperFile: '$(projectDir)/gradlew'
@@ -82,34 +83,43 @@ steps:
       if not exist $(resultsFolder) mkdir $(resultsFolder)
     displayName: "Preparar directorios JMeter"
 
-
-  # PASO 10: Levantar la aplicación en Docker antes de JMeter
+  # PASO 10: Levantar la aplicación en Docker
   - script: |
       echo "Limpiando cualquier contenedor previo para evitar conflictos..."
       docker-compose down
       echo "Encendiendo la calculadora en Docker..."
       docker-compose up -d --force-recreate
-      echo "Esperando 15 segundos a que Spring Boot inicie por completo..."
-      ping 127.0.0.1 -n 16 > nul
+      echo "Esperando 20 segundos a que Spring Boot e interfaces inicien por completo..."
+      ping 127.0.0.1 -n 21 > nul
     displayName: "Docker: Levantar Contenedor"
     workingDirectory: '$(projectDir)'
 
-  # Paso 11: Ejecutar prueba de rendimiento con JMeter (Modo No-GUI)
+  # ==========================================
+  # NUEVO PASO 11: EJECUTAR CYPRESS E2E
+  # ==========================================
+  - script: |
+      echo "Instalando dependencias de Node y Cypress..."
+      npm install
+      echo "Corriendo las pruebas de Cypress en modo headless..."
+      npx cypress run
+    displayName: "Cypress: Ejecutar Pruebas E2E"
+    workingDirectory: '$(projectDir)'
+
+  # Paso 12: Ejecutar prueba de rendimiento con JMeter (Modo No-GUI)
   - script: |
       echo "Ejecutando prueba de rendimiento con JMeter..."
       "C:\Users\carde\OneDrive\Desktop\Jmeter\apache-jmeter-5.6.3\bin\jmeter.bat" -n -t "$(jmxFile)" -l "$(resultsFile)" -e -o "$(htmlReport)"
     displayName: "Ejecución de prueba JMeter"
 
-
-  # PASO 12: Apagar y limpiar contenedores (SIEMPRE SE EJECUTA)
+  # PASO 13: Apagar y limpiar contenedores (SIEMPRE SE EJECUTA)
   - script: |
       echo "Apagando contenedores y liberando puertos..."
       docker-compose down
     displayName: "Docker: Apagar y Limpiar"
     workingDirectory: '$(projectDir)'
-    condition: always() # Obliga a que corra incluso si las pruebas de JMeter fallan
+    condition: always()
 
-  # Paso 13: Publicar reporte HTML de JMeter como Artefacto
+  # Paso 14: Publicar reporte HTML de JMeter como Artefacto
   - task: PublishBuildArtifacts@1
     inputs:
       PathtoPublish: '$(htmlReport)'
