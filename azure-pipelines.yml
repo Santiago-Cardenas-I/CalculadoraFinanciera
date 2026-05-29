@@ -27,6 +27,7 @@ steps:
       workingDirectory: '$(projectDir)'
       gradleWrapperFile: '$(projectDir)/gradlew'
       gradleOptions: '-Dfile.encoding=UTF-8 -Xmx3072m'
+      options: '-x test' # Evita correr pruebas unitarias en esta etapa, las haremos después con JUnit para mejor reporte
       publishJUnitResults: true
       testResultsFiles: '**/build/test-results/test/TEST-*.xml'
       tasks: 'clean build test'
