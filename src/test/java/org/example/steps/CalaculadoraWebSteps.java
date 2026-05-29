@@ -1,14 +1,9 @@
-package org.example.steps; // <--- 1. Tu archivo vive aquí
+package org.example.steps;
 
 import io.cucumber.java.en.*;
-import org.example.ui.LoginPage;      // <--- 2. Ruta directa a tus Page Objects
-import org.example.ui.SimuladorPage;  // <--- 3. Ruta directa a tus Page Objects
-import static org.junit.jupiter.api.Assertions.*;
 
-public class CalaculadoraWebSteps { // Mantiene el nombre exacto de tu archivo
 
-    private final LoginPage loginPage = new LoginPage();
-    private final SimuladorPage simuladorPage = new SimuladorPage();
+public class CalaculadoraWebSteps {
 
     @Given("el usuario abre la pagina de login de la calculadora")
     public void elUsuarioAbreLaPaginaDeLoginDeLaCalculadora() {

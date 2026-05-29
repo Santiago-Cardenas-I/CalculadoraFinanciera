@@ -13,32 +13,39 @@ repositories {
     mavenCentral()
 }
 
+// 1. Centralizamos las versiones
 val junitVersion = "5.10.0"
 val pitestJunit5Version = "1.2.1"
+val cucumberVersion = "7.18.0"
+val junitPlatformSuiteVersion = "1.10.2"
+val serenityVersion = "3.9.8"
+val seleniumVersion = "4.14.1"
 
+// 2. Agrupamos las dependencias
 dependencies {
 
-
-
+    // --- DEPENDENCIAS DE PRODUCCIÓN ---
     implementation("org.springframework.boot:spring-boot-starter-web")
 
-
-    testImplementation(platform("org.junit:junit-bom:$junitVersion"))
+    // --- DEPENDENCIAS DE PRUEBAS (testImplementation) ---
+    testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.junit.platform:junit-platform-suite:${junitPlatformSuiteVersion}")
 
+    // Cucumber
+    testImplementation("io.cucumber:cucumber-java:${cucumberVersion}")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine:${cucumberVersion}")
+
+    // Serenity BDD
+    testImplementation("net.serenity-bdd:serenity-core:${serenityVersion}")
+    testImplementation("net.serenity-bdd:serenity-cucumber:${serenityVersion}")
+
+    // Selenium
+    testImplementation("org.seleniumhq.selenium:selenium-java:${seleniumVersion}")
+
+    // --- DEPENDENCIAS DE EJECUCIÓN DE PRUEBAS (testRuntimeOnly) ---
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    testImplementation("io.cucumber:cucumber-java:7.18.0")
-    testImplementation("io.cucumber:cucumber-junit-platform-engine:7.18.0")
-
-    testImplementation("org.junit.platform:junit-platform-suite:1.10.2")
-
-    testImplementation("net.serenity-bdd:serenity-core:3.9.8")
-    testImplementation("net.serenity-bdd:serenity-cucumber:3.9.8")
-    testImplementation("org.seleniumhq.selenium:selenium-java:4.14.1")
-
 
 }
 
